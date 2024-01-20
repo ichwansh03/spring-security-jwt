@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -45,7 +47,11 @@ public class JwtService {
     }
 
     private boolean isTokenExpired(String token) {
-        return false;
+        return extractExpiration(token).before(new java.util.Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return extractClaims(token, Claims::getExpiration);
     }
 
     private Claims extractAllClaims(String token) {
