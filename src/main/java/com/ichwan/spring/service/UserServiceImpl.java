@@ -9,6 +9,7 @@ import com.ichwan.spring.repository.RoleRepository;
 import com.ichwan.spring.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,8 @@ public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Override
     public UserResponse save(UserRequest userRequest) {
@@ -26,11 +29,12 @@ public class UserServiceImpl implements UserService{
         user.setName(userRequest.name());
         user.setEmail(userRequest.email());
         user.setUsername(userRequest.username());
-        user.setPassword(userRequest.password());
+        user.setPassword(passwordEncoder.encode(userRequest.password()));
 
         userRepository.save(user);
+        var jwtToken = jwtService.generateToken(user);
 
-        return new UserResponse(user.getId(), user.getUsername());
+        return new UserResponse(user.getId(), user.getUsername(), jwtToken);
     }
 
     @Override
@@ -38,7 +42,7 @@ public class UserServiceImpl implements UserService{
         Users user = userRepository.findById(aLong)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        return new UserResponse(user.getId(), user.getUsername());
+        return new UserResponse(user.getId(), user.getUsername(), null);
     }
 
     @Override
@@ -57,13 +61,13 @@ public class UserServiceImpl implements UserService{
         user.setPassword(userRequest.password());
         userRepository.save(user);
 
-        return new UserResponse(user.getId(), user.getUsername());
+        return new UserResponse(user.getId(), user.getUsername(), jwtService.generateToken(user));
     }
 
     @Override
     public List<UserResponse> findAll() {
         return userRepository.findAll().stream()
-                .map(user -> new UserResponse(user.getId(), user.getUsername()))
+                .map(user -> new UserResponse(user.getId(), user.getUsername(), null))
                 .toList();
     }
 
@@ -71,7 +75,6 @@ public class UserServiceImpl implements UserService{
     public RoleResponse assign(String username, String roleName) {
         Users user = userRepository.findByUsername(username);
         Roles role = new Roles();
-        role.setUsers(user);
         role.setRoleName(roleName);
         roleRepository.save(role);
 
