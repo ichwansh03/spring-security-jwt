@@ -2,13 +2,13 @@ package com.ichwan.spring.service;
 
 import com.ichwan.spring.dto.RoleRequest;
 import com.ichwan.spring.dto.RoleResponse;
+import com.ichwan.spring.entity.Roles;
 import com.ichwan.spring.enumeration.PermissionType;
 import com.ichwan.spring.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -18,7 +18,11 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleResponse save(RoleRequest roleRequest) {
-        return null;
+        Roles roles = new Roles();
+        roles.setRoleName(roleRequest.roleName());
+        roleRepository.save(roles);
+
+        return new RoleResponse(roles.getRoleName());
     }
 
     @Override

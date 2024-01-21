@@ -9,6 +9,7 @@ import com.ichwan.spring.repository.RoleRepository;
 import com.ichwan.spring.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class UserServiceImpl implements UserService{
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     public UserResponse save(UserRequest userRequest) {
@@ -78,6 +80,6 @@ public class UserServiceImpl implements UserService{
         role.setRoleName(roleName);
         roleRepository.save(role);
 
-        return new RoleResponse(user.getUsername(), role.getRoleName());
+        return new RoleResponse(role.getRoleName());
     }
 }
